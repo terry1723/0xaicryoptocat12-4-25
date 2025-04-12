@@ -208,18 +208,27 @@ except AttributeError:
             return json.dumps(fig_dict)
     plotly.io._json.to_json_plotly = patched_to_json_plotly
 
-# 安全地從 secrets 或環境變量獲取 API 密鑰
+# 修改：安全地從 secrets 或環境變量獲取 API 密鑰
 def get_api_key(key_name, default_value=None):
-    """安全地獲取 API 密鑰，優先從 Streamlit secrets 獲取，然後是環境變量，最後是默認值"""
+    """安全地獲取 API 密鑰，優先從環境變量獲取，然後是 Streamlit secrets，最後是默認值"""
+    # 首先嘗試從環境變量獲取
+    env_value = os.getenv(key_name)
+    if env_value:
+        print(f"從環境變量獲取 {key_name} 成功")
+        return env_value
+        
+    # 如果環境變量不存在，嘗試從 Streamlit secrets 獲取
     try:
         if key_name in st.secrets:
+            print(f"從 Streamlit secrets 獲取 {key_name} 成功")
             return st.secrets[key_name]
-    except Exception:
-        # 忽略 secrets 相關錯誤
-        pass
+    except Exception as e:
+        # 如果無法訪問 secrets，記錄錯誤但不中斷
+        print(f"無法從 Streamlit secrets 獲取 {key_name}: {e}")
         
-    # 如果無法從 secrets 獲取，嘗試從環境變量獲取，最後使用默認值
-    return os.getenv(key_name, default_value)
+    # 如果兩者都不存在，使用默認值
+    print(f"使用默認值作為 {key_name}")
+    return default_value
 
 # 從Streamlit secrets或環境變數讀取API密鑰，如果都不存在則使用預設值
 DEEPSEEK_API_KEY = get_api_key("DEEPSEEK_API_KEY", "sk-6ae04d6789f94178b4053d2c42650b6c")
