@@ -70,3 +70,9 @@
 1. 確保已創建 `.streamlit/secrets.toml` 文件
 2. 檢查是否正確設置了環境變量
 3. 確認部署平台上已配置相應的密鑰 
+
+echo "更新於 $(date)" >> README.md 
+
+git add .
+git commit -m "更新文檔"
+git push origin main 
